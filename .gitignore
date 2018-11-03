@@ -1,4 +1,4 @@
-.meteor
+.meteor/local
 .DS_Store
 .idea/
 *.iml
