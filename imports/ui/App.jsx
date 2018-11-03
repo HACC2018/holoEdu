@@ -1,12 +1,13 @@
 import React from 'react';
-import Hello from './Hello.jsx';
-import Info from './Info.jsx';
+import Nav from './Nav.jsx';
+import Header from './Header.jsx';
+import GroupSearch from './GroupSearch.jsx';
 
 const App = () => (
   <div>
-    <h1>Welcome to Meteor!</h1>
-    <Hello />
-    <Info />
+    <Nav />
+    <Header />
+    <GroupSearch />
   </div>
 );
 
