@@ -3,8 +3,11 @@ import $ from 'jquery';
 import { Meteor } from 'meteor/meteor';
 import 'meteor/accounts-password';
 import SiteInvitations from '../api/site_invitations.js';
+import Profiles from '../api/profiles.js';
+import { withTracker } from 'meteor/react-meteor-data';
+import { Accounts } from 'meteor/accounts-base';
 
-export default class LoginPortal extends Component {
+class LoginPortal extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,13 +17,17 @@ export default class LoginPortal extends Component {
   }
 
   login() {
+    var self = this;
     Meteor.loginWithPassword(
       { email: $('#login-input-email').val() },
       $('#login-input-password').val(),
       (error) => {
-        if (error) console.log(error);
         if (error) self.setState({ errorMessage: error.message });
       });
+  }
+
+  handleToggleClick() {
+    this.setState({ onLogin: !this.state.onLogin });
   }
 
   handleClick(event) {
@@ -43,28 +50,13 @@ export default class LoginPortal extends Component {
       this.setState({ error: 'Invalid email or invitation code.' });
     }
     else {
-      var id = Accounts.createUser({
-        username: $('#login-input-email'),
-        email: $('#login-input-email'),
-        password: $('#login-input-password')
-      });
+      var username = $('#login-input-email').val(),
+        email = $('#login-input-email').val(),
+        name = $('#login-input-name').val(),
+        password = $('#login-input-password').val(),
+        invite_id = $('#login-input-invite-code').val();
 
-      Profiles.insert({
-        userId: id,
-        name: $('#login-input-name'),
-        image: Meteor.settings.defaultImage,
-        points: 0,
-        subject: '',
-        school: '',
-        interests: [],
-        createdAt: new Date(),
-        friends: [
-          SiteInvitations.findOne({
-            _id: $('#login-input-invite-code').val() }).inviter
-        ]
-      });
-
-      SiteInvitations.remove({ _id: $('#login-input-invite-code').val() });
+      Meteor.call('acceptInvite', username, name, email, password, invite_id);
     }
   }
 
@@ -79,7 +71,8 @@ export default class LoginPortal extends Component {
 
   render() {
     var handleClick = this.handleClick.bind(this),
-      handleInviteClick = this.handleInviteClick.bind(this);
+      handleInviteClick = this.handleInviteClick.bind(this),
+      handleToggleClick = this.handleToggleClick.bind(this);
 
     if (this.state.onLogin) return (
       <div className="ui segment container">
@@ -104,13 +97,14 @@ export default class LoginPortal extends Component {
           {' '}
           Sign in
         </button>
-        { SiteInvitations.find().count() ? <button className="ui button blue"
-          onClick={handleClick}>
-          Enter Invite Code.
-        </button> : null }
+        { this.props.invitees.length > 0 ?
+          <button className="ui button blue"
+            onClick={handleToggleClick}>
+          Enter Invite Code
+          </button> : null }
       </div>
     );
-    else {
+    else return (
       <div className="ui segment container">
         <h2 className="ui header">Accept Invitation</h2>
         {this.state.errorMessage &&
@@ -143,7 +137,17 @@ export default class LoginPortal extends Component {
           {' '}
           Accept Invite
         </button>
+        <button className="ui button blue"
+          onClick={handleToggleClick}>
+          Login
+        </button>
       </div>
-    }
+    );
   }
 }
+
+export default withTracker(() => {
+  return {
+    invitees: SiteInvitations.find().fetch()
+  };
+})(LoginPortal);
