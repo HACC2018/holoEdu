@@ -1,27 +1,180 @@
 import React, { Component } from 'react';
+import { withTracker } from 'meteor/react-meteor-data';
+import Profiles from '../api/profiles.js';
+import { Meteor } from 'meteor/meteor';
+import Schools from '../api/schools.js';
+import Subjects from '../api/subjects.js';
 
-export default class Header extends Component {
+class Header extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editMode: false,
+      name: this.props.profile.name,
+      grade_level: this.props.profile.grade_level,
+      subject: this.props.profile.subject,
+      school: this.props.profile.school,
+      description: this.props.profile.description
+    };
+  }
+
+  logout() {
+    Meteor.logout();
+  }
+
+  handleClick(event) {
+    this.logout();
+  }
+
+  handleEditClick(event) {
+    this.setState({ editMode: true });
+  }
+
+  handleSaveClick(event) {
+    this.setState({ editMode: false }, function() {
+      Profiles.update({ _id: this.props.profile._id }, { $set:
+        {
+          name: this.state.name,
+          grade_level: this.state.grade_level,
+          subject: this.state.subject,
+          school: this.state.school,
+          description: this.state.description
+        }
+      });
+    });
+  }
+
+  handleCancelClick(event) {
+    this.setState({ editMode: false,
+      name: this.props.profile.name,
+      grade_level: this.props.profile.grade_level,
+      subject: this.props.profile.subject,
+      school: this.props.profile.school,
+      description: this.props.profile.description
+    });
+  }
+
+  handleSelectChange(event) {
+    var self = this;
+    return function(key) {
+      var newState = {};
+      newState[key] = event.target.value;
+      self.setState(newState);
+    };
+  }
+
   render() {
+    var handleClick = this.handleClick.bind(this),
+      handleEditClick = this.handleEditClick.bind(this),
+      handleCancelClick = this.handleCancelClick.bind(this),
+      handleSaveClick = this.handleSaveClick.bind(this),
+      handleSelectChange =this.handleSelectChange.bind(this);
+
     return (
       <header className="ui segment container">
         <div className="ui grid">
           <div className="four wide column">
-            <img className="ui medium circular image" src=
-              "data:image/png;base64,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"/>
+            <img className="ui medium circular image"
+              src={this.props.profile.image} />
           </div>
           <div className="ten wide column">
-            <h1 className="ui header">FirstName LastName</h1>
+            {this.state.editMode ?
+              <input className="ui fluid input" style={{
+                fontSize: '2rem', fontFamily:
+                  'Lato, "Helvetica Neue",Arial,Helvetica,sans-serif',
+                fontWeight: 700
+              }} type="text" value={this.state.name}
+              onChange={(e) => { handleSelectChange(e)('name'); }} /> :
+              <h1 className="ui header">{this.props.profile.name}</h1>}
             <p>
-              <a href="#" className="ui circular label">School</a>
-              <a href="#" className="ui circular label">Subject</a>
-              <a href="#" className="ui circular label">Grade Level</a>
+              {this.state.editMode ? (
+                <select onChange={(e) => { handleSelectChange(e)('school'); }}
+                  value={this.state.school !== '' ?
+                    this.state.school : 'none'}>
+                  <option value='none'>No school chosen.</option>
+                  {Schools.find().fetch().map((school) => (
+                    <option value={school._id}>{school.name}</option>
+                  ))}
+                </select>
+              ) : (!!this.props.profile.school ?
+                <a href="#" className="ui circular label">
+                  {Schools.findOne({
+                    _id: this.props.profile.school
+                  }).name}</a> : null)}
+              {this.state.editMode ? (
+                <select onChange={(e) => { handleSelectChange(e)('subject'); }}
+                  value={this.state.subject !== '' ?
+                    this.state.subject : 'none'}>
+                  <option value='none'>No subject chosen.</option>
+                  {Subjects.find().fetch().map((subject) => (
+                    <option value={subject._id}>{subject.name}</option>
+                  ))}
+                </select>) : (!!this.props.profile.subject ?
+                <a href="#" className="ui circular label">
+                  {Subjects.findOne({ _id: this.props.profile.subject }).name}
+                </a> : null)}
+              {this.state.editMode ? (
+                <select onChange={(e) => {
+                  handleSelectChange(e)('grade_level');
+                }} value={this.state.grade_level !== '' ?
+                  this.state.grade_level : 'none'}>
+                  <option value='none'>No grade level chosen.</option>
+                  {['Elementary', 'Kindergarten', '1st Grade',
+                    '2nd Grade', '3rd Grade', '4th Grade', '5th Grade',
+                    'Middle/Intermediate', '6th Grade', '7th Grade',
+                    '8th Grade', 'High', '9th Grade',  '10th Grade',
+                    '11th Grade', '12th Grade'
+                  ].map((gradeLevel) =>
+                    <option value={gradeLevel}>{gradeLevel}</option>)}
+                </select>
+              ) : (!!this.props.profile.grade_level ?
+                <a href="#" className="ui circular label">
+                  {this.props.profile.grade_level}
+                </a> : null)}
             </p>
+            {this.state.editMode ? (
+              <textarea onChange={(e) => {
+                handleSelectChange(e)('description'); }}
+              value={this.state.description ?
+                this.state.description : '' } />) :
+              ((!!this.props.profile.description &&
+                this.props.profile.description.length > 0) ?
+                <div dangerouslySetInnerHTML=
+                  {{ __html: this.props.profile.description }} /> : null)}
           </div>
           <div className="two wide column">
-            <p><a href="#">log out</a></p>
+            { this.state.editMode ?
+              [<p>
+                <a className="ui icon" href="#" onClick={handleSaveClick}>
+                  <i className="save icon"></i>
+                  Save Profile
+                </a>
+              </p>, <p>
+                <a className="ui icon" href="#" onClick={handleCancelClick}>
+                  <i className="cancel icon"></i>
+                  Cancel
+                </a>
+              </p>]: (<p>
+                <a className="ui icon" href="#" onClick={handleEditClick}>
+                  <i className="edit icon"></i>
+                  Edit Profile
+                </a>
+              </p>) }
+            <p>
+              <a className="ui icon" href="#" onClick={handleClick}>
+                <i className="logout icon"></i>
+                Log Out
+              </a>
+            </p>
           </div>
         </div>
       </header>
     );
   }
 }
+
+export default withTracker(() => {
+  return {
+    profile: Profiles.findOne({ userId: Meteor.userId() })
+  };
+})(Header);

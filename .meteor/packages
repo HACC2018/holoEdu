@@ -20,3 +20,6 @@ insecure@1.0.7                # Allow all DB writes from clients (for prototypin
 static-html             # Define static page content in .html files
 react-meteor-data       # React higher-order component for reactively tracking Meteor data
 aldeed:simple-schema
+accounts-password
+meteorhacks:picker
+momentjs:moment

@@ -1,14 +1,8 @@
 import React from 'react';
-import Nav from './Nav.jsx';
-import Header from './Header.jsx';
-import GroupSearch from './GroupSearch.jsx';
+import Layout from './Layout.jsx';
 
 const App = () => (
-  <div>
-    <Nav />
-    <Header />
-    <GroupSearch />
-  </div>
+  <Layout />
 );
 
 export default App;
