@@ -8,8 +8,13 @@ class InviteSection extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      errorMessage: ''
+      errorMessage: '',
+      collapsed: false
     };
+  }
+
+  handleCollapseToggle() {
+    this.setState({ collapsed: !this.state.collapsed });
   }
 
   handleKeyPress(event) {
@@ -54,31 +59,40 @@ class InviteSection extends Component {
   }
 
   render() {
-    var handleKeyPress = this.handleKeyPress.bind(this);
+    var handleKeyPress = this.handleKeyPress.bind(this),
+      handleCollapseToggle = this.handleCollapseToggle.bind(this);
 
     return (
       <section className="ui segment container">
-        <h2 className="ui header">Invite Friends</h2>
-        <div className="ui left icon fluid input">
-          <input type="text" id="invite-input-email"
-            placeholder="Invite by Email" onKeyPress={handleKeyPress}/>
-          <i className="send icon"></i>
-        </div>
-        {(this.state.errorMessage && this.state.errorMessage !== '') ?
-          <div className="ui error message">
-            <p>{this.state.errorMessage}</p>
-          </div> : null}
-        {this.props.invitations.length > 0 ? [
-          <h3 className="ui header">Pending Invitations</h3>,
-          this.props.invitations.map(
-            (invitation) =>
-              <div>{invitation.email} - invited {moment.duration(
-                moment(invitation.createdAt)
-                  .diff(new Date())).humanize()} ago</div>),
-          <p className="ui one column center aligned grid">
-            <button className="ui button blue">More</button>
+        <h2 className="ui header" style={{ marginBottom: 0 }}>
+          Invite Friends</h2>
+        <div style={{ float: 'right', position: 'relative', top: '-25px' }}>
+          <p>
+            <a className="ui icon" onClick={handleCollapseToggle}
+              style={{ fontSize: '24px' }}>
+              <i className='expand icon'></i>
+              {this.state.collapsed ? 'Expand': 'Collapse'}
+            </a>
           </p>
-        ]: null}
+        </div>
+        {!this.state.collapsed ? [
+          <div className="ui left icon fluid input">
+            <input type="text" id="invite-input-email"
+              placeholder="Invite by Email" onKeyPress={handleKeyPress}/>
+            <i className="send icon"></i>
+          </div>,
+          (this.state.errorMessage && this.state.errorMessage !== '') ?
+            <div className="ui error message">
+              <p>{this.state.errorMessage}</p>
+            </div> : null,
+          this.props.invitations.length > 0 ? [
+            <h3 className="ui header">Pending Invitations</h3>,
+            this.props.invitations.map(
+              (invitation) =>
+                <div>{invitation.email} - invited {moment.duration(
+                  moment(invitation.createdAt)
+                    .diff(new Date())).humanize()} ago</div>)
+          ]: null] : null}
       </section>
     );
   }
