@@ -49,6 +49,8 @@ class NotificationSection extends Component {
 }
 
 export default withTracker(() => {
+  Meteor.subscribe('notificationsDefault', Meteor.userId());
+
   return {
     newNotifications: Notifications.find({
       read: false,

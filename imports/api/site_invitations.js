@@ -1,5 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
+import { check } from 'meteor/check';
 
 var SiteInvitations = new Mongo.Collection('site_invitations');
 
@@ -16,3 +17,10 @@ SiteInvitations.schema = new SimpleSchema({
 });
 
 export default SiteInvitations;
+
+if (Meteor.isServer) {
+  Meteor.publish('invitationsById', function(userId) {
+    check(userId, String);
+    return SiteInvitations.find({ inviter: userId });
+  });
+}

@@ -76,9 +76,10 @@ class InviteSection extends Component {
           </p>
         </div>
         {!this.state.collapsed ? [
-          <div className="ui left icon fluid input">
+          <div className="ui left icon fluid input"
+            style={{ marginTop: '15px' }}>
             <input type="text" id="invite-input-email"
-              placeholder="Invite by Email" onKeyPress={handleKeyPress}/>
+              placeholder="Invite by Email" onKeyPress={handleKeyPress} />
             <i className="send icon"></i>
           </div>,
           (this.state.errorMessage && this.state.errorMessage !== '') ?
@@ -99,6 +100,8 @@ class InviteSection extends Component {
 }
 
 export default withTracker(() => {
+  Meteor.subscribe('invitationsById', Meteor.userId());
+
   return {
     invitations: SiteInvitations.find({ inviter: Meteor.userId() }).fetch()
   };

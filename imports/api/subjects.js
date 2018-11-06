@@ -8,3 +8,10 @@ Subjects.schema = new SimpleSchema({
 });
 
 export default Subjects;
+
+
+if (Meteor.isServer) {
+  Meteor.publish('allSubjects', function() {
+    return Subjects.find();
+  });
+}

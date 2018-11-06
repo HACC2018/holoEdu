@@ -2,10 +2,22 @@ import { Meteor } from 'meteor/meteor';
 import SiteInvitations from '../imports/api/site_invitations.js';
 import Notifications from '../imports/api/notifications.js';
 import Profiles from '../imports/api/profiles.js';
+import Messages from '../imports/api/messages.js';
 import { check } from 'meteor/check';
 import { Accounts } from 'meteor/accounts-base';
 
 Meteor.methods({
+  sendMessage: function(sender, thread, content) {
+    check(sender, String);
+    check(thread, String);
+    check(content, String);
+    Messages.insert({
+      sender: sender,
+      thread: thread,
+      content: content,
+      createdAt: new Date()
+    });
+  },
   acceptInvite: function(username, name, email, password, invite_id) {
     check(username, String);
     check(name, String);

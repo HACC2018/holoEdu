@@ -1,5 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
+import { check } from 'meteor/check';
 
 var Profiles = new Mongo.Collection('profiles');
 
@@ -34,3 +35,25 @@ Profiles.schema = new SimpleSchema({
 });
 
 export default Profiles;
+
+if (Meteor.isServer) {
+  Meteor.publish('singleProfile', function(userId) {
+    check(userId, String);
+    return Profiles.find({ userId: userId });
+  });
+
+  Meteor.publish('allProfiles', function() {
+    return Profiles.find();
+  });
+
+  Meteor.publish('friendsProfiles', function(userId) {
+    check(userId, String);
+    return Profiles.find({ friends: userId });
+  });
+
+  Meteor.publish('nonfriends', function(userId) {
+    check(userId, String);
+    return Profiles.find({ userId: { $ne: userId },
+      friends: { $nin: [userId] } });
+  });
+}

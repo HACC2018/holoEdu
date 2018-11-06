@@ -9,3 +9,9 @@ Schools.schema = new SimpleSchema({
 });
 
 export default Schools;
+
+if (Meteor.isServer) {
+  Meteor.publish('allSchools', function() {
+    return Schools.find({});
+  });
+}

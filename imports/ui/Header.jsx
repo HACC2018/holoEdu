@@ -179,6 +179,10 @@ class Header extends Component {
 }
 
 export default withTracker(() => {
+  Meteor.subscribe('allSchools');
+  Meteor.subscribe('allSubjects');
+  Meteor.subscribe('singleProfile', Meteor.userId());
+
   return {
     profile: Profiles.findOne({ userId: Meteor.userId() })
   };
