@@ -6,7 +6,43 @@ import { withTracker } from 'meteor/react-meteor-data';
 import Profiles from '../api/profiles.js';
 import Groups from '../api/groups.js';
 
+class MessageNode extends Component {
+  render() {
+    return (
+      <div style={{ border: 'thin black solid', borderRadius: '2px',
+        padding: '10px' }}>
+        <div>
+          <p style={{ marginBottom: 0 }}><b>
+            {this.props.message.sender !== Meteor.userId() ?
+              Profiles.findOne({
+                userId: this.props.message.sender }).name : 'You'}
+          </b>{' '}{moment.duration(
+            moment(this.props.message.createdAt).diff(new Date())).humanize() +
+            ' ago'}</p>
+          <p>{this.props.message.content}</p>
+        </div>
+      </div>
+    );
+  }
+}
+
 class MessageThread extends Component {
+  componentDidMount() {
+    document.getElementById('bottom').scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
+
+  componentWillUnmount() {
+    this.props.stop();
+  }
+
+  componentDidUpdate() {
+    document.getElementById('bottom').scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
+
   constructor(props) {
     super(props);
   }
@@ -27,22 +63,14 @@ class MessageThread extends Component {
     return (
       <section className="ui segment container">
         <h2 className="ui header">Conversation with{' '}
-          {Profiles.findOne({ userId: this.props.threadId }).name ||
-            Groups.findOne({ _id: this.props.threadId }).name }</h2>
-        <div>
+          {(Profiles.findOne({ userId: this.props.threadId }) &&
+            Profiles.findOne({ userId: this.props.threadId }).name || null) ||
+            (Groups.findOne({ _id: this.props.threadId }) && 
+            Groups.findOne({ _id: this.props.threadId }).name || null) }</h2>
+        <div style={{ height: '225px', overflowY: 'scroll' }}>
           {this.props.getThread.map((message) =>
-            <div>
-              <div>
-                <p><b>
-                  {message.sender !== Meteor.userId() ?
-                    Profiles.findOne({ userId: message.sender }).name : 'You'}
-                </b>{' '}{moment.duration(
-                  moment(message.createdAt).diff(new Date())).humanize() +
-                  ' ago'}</p>
-                <p>{message.content}</p>
-              </div>
-            </div>
-          )}
+            <MessageNode message={message} /> )}
+          <div id="bottom"></div>
         </div>
         <div className="ui left icon fluid input"
           style={{ marginTop: '15px' }}>
@@ -60,7 +88,14 @@ export default withTracker(({ threadId }) => {
   Meteor.subscribe('allProfiles');
 
   return {
+    stop: function() { handle.stop(); },
     threadId: threadId,
-    getThread: Messages.find().fetch()
+    getThread: Messages.find({ $or: [{
+      thread: Meteor.userId(),
+      sender: threadId
+    }, {
+      sender: Meteor.userId(),
+      thread: threadId
+    }] }, { $sort: { createdAt: -1 } }).fetch()
   };
 })(MessageThread);

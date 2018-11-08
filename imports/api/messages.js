@@ -24,6 +24,13 @@ if (Meteor.isServer) {
     }, {
       sender: userId,
       thread: threadId
+    }, {
+      thread: {
+        $in: Groups.find({ $or: [
+          { creatorUserId: userId },
+          { members: userId }
+        ] }).fetch().map((group) => group._id)
+      }
     }] }, { $sort: { createdAt: -1 } });
   });
 

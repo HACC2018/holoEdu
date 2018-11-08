@@ -16,13 +16,29 @@ class FriendsList extends Component {
     this.props.callback(_id);
   }
 
+  nameClickCallback(_id) {
+    this.props.nameClickCallback(_id);
+  }
+
   handleCollapseToggle() {
     this.setState({ collapsed: !this.state.collapsed });
   }
 
+  connectCallback(id) {
+    this.props.connectCallback(id);
+  }
+
+  groupClick(id) {
+    this.props.groupClick(id);
+  }
+
   render() {
     var handleCollapseToggle = this.handleCollapseToggle.bind(this),
-      callback = this.callback.bind(this);
+      callback = this.callback.bind(this),
+      nameClickCallback = this.nameClickCallback.bind(this),
+      connectCallback = this.connectCallback.bind(this),
+      groupClick = this.groupClick.bind(this),
+      getGroup = this.props.getGroup;
 
     if (this.props.ready && this.props.friends.length > 0) {
       return (
@@ -39,13 +55,16 @@ class FriendsList extends Component {
           </div>
           {!this.state.collapsed ? [
             <div className="ui left icon fluid input"
-              style={{ marginTop: '15px' }}>
+              style={{ marginTop: '15px', marginBottom: '15px' }}>
               <input type="text" placeholder="Search..." />
               <i className="search icon"></i>
             </div>,
-            <div data-slick='{"slidesToShow": 4, "slidesToScroll": 4}'>
+            <div className="ui items" style={{ display: 'inline' }}>
               {this.props.friends.map((friend) =>
-                <ProfileCard profile={friend} callback={callback} />)}
+                <ProfileCard key={friend._id} profile={friend} isFriend={true}
+                  callback={callback} nameClickCallback={nameClickCallback}
+                  connectCallback={connectCallback} groupClick={groupClick}
+                  getGroup={getGroup} />)}
             </div>] : null}
         </section>
       );

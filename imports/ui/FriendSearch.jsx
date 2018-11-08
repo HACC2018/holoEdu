@@ -15,8 +15,18 @@ class FriendSearch extends Component {
     this.setState({ collapsed: !this.state.collapsed });
   }
 
+  callback(_id) {
+    this.props.callback(_id);
+  }
+
+  nameClickCallback(_id) {
+    this.props.nameClickCallback(_id);
+  }
+
   render() {
-    var handleCollapseToggle = this.handleCollapseToggle.bind(this);
+    var handleCollapseToggle = this.handleCollapseToggle.bind(this),
+      callback = this.callback.bind(this),
+      nameClickCallback = this.nameClickCallback.bind(this);
 
     if (this.props.nonfriends.length) {
       return (
@@ -33,15 +43,17 @@ class FriendSearch extends Component {
             </p>
           </div>
           <div className="ui left icon fluid input"
-            style={{ marginTop: '15px' }}>
+            style={{ marginTop: '15px', marginBottom: '15px' }}>
             <input type="text" placeholder="Search..." />
             <i className="search icon"></i>
           </div>
-          {this.props.nonfriends.map(
-            (nonfriend) => <ProfileCard profile={nonfriend} /> )}
-          <p className="ui one column center aligned grid">
-            <button className="ui button blue">More</button>
-          </p>
+          <div class='ui items'>
+            {this.props.nonfriends.map(
+              (nonfriend) =>
+                <ProfileCard key={nonfriend._id} profile={nonfriend}
+                  isFriend={false} callback={callback}
+                  nameClickCallback={nameClickCallback} />)}
+          </div>
         </section>
       );
     }

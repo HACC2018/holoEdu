@@ -6,6 +6,10 @@ import InviteSection from './InviteSection.jsx';
 import LoginPortal from './LoginPortal.jsx';
 import MessagesList from './MessagesList.jsx';
 import MessageThread from './MessageThread.jsx';
+import Groups from '../api/groups.js';
+import GroupsList from './GroupsList.jsx';
+import GroupAddModal from './GroupAddModal.jsx';
+import GroupCreateModal from './GroupCreateModal.jsx';
 import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
 import NotificationSection from './NotificationSection.jsx';
@@ -27,7 +31,9 @@ class Layout extends Component {
     super(props);
     this.state = {
       activeIconType: 'user',
-      activeMessageThread: ''
+      activeMessageThread: '',
+      activeViewingProfile: '',
+      groupAddee: ''
     };
   }
 
@@ -55,9 +61,44 @@ class Layout extends Component {
     });
   }
 
+  nameClickCallback(_id) {
+    var self = this;
+    self.setState({
+      activeIconType: 'user',
+      activeViewingProfile: _id
+    });
+  }
+
+  handleBackClick() {
+    var self = this;
+    self.setState({
+      activeIconType: 'user',
+      activeViewingProfile: ''
+    });
+  }
+
+  addFriend(_id) {
+    Meteor.call('addFriend', Meteor.userId(), _id);
+  }
+
+  groupClick(id) {
+    this.setState({ groupAddee: id }, function() {
+      $('#group-add-modal').modal('show');
+    });
+  }
+
+  createClick() {
+    $('#group-create-modal').modal('show');
+  }
+
   render() {
     var handleClick = this.handleClick.bind(this),
-      messageCallback = this.messageCallback.bind(this);
+      messageCallback = this.messageCallback.bind(this),
+      addFriend = this.addFriend.bind(this),
+      nameClickCallback = this.nameClickCallback.bind(this),
+      handleBackClick = this.handleBackClick.bind(this),
+      groupClick = this.groupClick.bind(this),
+      createClick = this.createClick.bind(this);
 
     return (
       <div>
@@ -74,11 +115,23 @@ class Layout extends Component {
               onClick={(e) => { handleClick(e)('rocketchat'); }} />
           </nav>,
           this.state.activeIconType === 'user' ? [
-            <Header />,
-            <NotificationSection />,
-            <FriendsList callback={messageCallback} />,
-            <FriendSearch />,
-            <InviteSection />
+            <Header id={this.state.activeViewingProfile || Meteor.userId() }
+              handleMessageClick={messageCallback} loggedInID={Meteor.userId()}
+              handleBackClick={handleBackClick} connectCallback={addFriend} />,
+            this.state.activeViewingProfile.length === 0 ? [
+              <NotificationSection />,
+              <GroupsList messageCallback={messageCallback}
+                createClick={createClick} userId={Meteor.userId()} />,
+              <GroupCreateModal loggedInID={Meteor.userId()} />,
+              <GroupAddModal profileId={this.state.groupAddee}
+                loggedInID={Meteor.userId()} />,
+              <FriendsList callback={messageCallback}
+                nameClickCallback={nameClickCallback}
+                getGroup={this.props.groups.length > 0}
+                groupClick={groupClick} />,
+              <FriendSearch callback={addFriend}
+                nameClickCallback={nameClickCallback} />,
+              <InviteSection />] : null
           ] : null,
           this.state.activeIconType === 'newspaper' ? null : null,
           this.state.activeIconType === 'rocketchat' ? [
@@ -95,9 +148,14 @@ class Layout extends Component {
 
 export default withTracker(() => {
   var handle = Meteor.subscribe('user');
+  var groups = Meteor.subscribe('groupsDefault', Meteor.userId());
 
   return {
-    ready: handle.ready() || true,
+    groups: Groups.find({ $or: [
+      { creatorUserId: Meteor.userId() },
+      { members: Meteor.userId() }
+    ] }).fetch(),
+    ready: (groups.ready() && handle.ready()) || true,
     currentUser: Meteor.user()
   };
 })(Layout);

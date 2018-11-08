@@ -90,9 +90,10 @@ class InviteSection extends Component {
             <h3 className="ui header">Pending Invitations</h3>,
             this.props.invitations.map(
               (invitation) =>
-                <div>{invitation.email} - invited {moment.duration(
-                  moment(invitation.createdAt)
-                    .diff(new Date())).humanize()} ago</div>)
+                <div key={invitation._id}>
+                  {invitation.email} - invited {moment.duration(
+                    moment(invitation.createdAt)
+                      .diff(new Date())).humanize()} ago</div>)
           ]: null] : null}
       </section>
     );

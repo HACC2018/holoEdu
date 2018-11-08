@@ -41,13 +41,11 @@ class LoginPortal extends Component {
   }
 
   acceptInvite() {
-    if (SiteInvitations.findOne({
-      email: $('#login-input-email').val()
-    })._id !== $('#login-input-invite-code').val() ||
-      SiteInvitations.findOne({
-        _id: $('#login-input-invite-code').val()
-      }).email !== $('#login-input-email').val()) {
-      this.setState({ error: 'Invalid email or invitation code.' });
+    if (!SiteInvitations.findOne({
+      email: $('#login-input-email').val(),
+      _id: $('#login-input-invite-code').val()
+    })) {
+      this.setState({ errorMessage: 'Invalid email or invitation code.' });
     }
     else {
       var username = $('#login-input-email').val(),
@@ -57,6 +55,13 @@ class LoginPortal extends Component {
         invite_id = $('#login-input-invite-code').val();
 
       Meteor.call('acceptInvite', username, name, email, password, invite_id);
+
+      Meteor.loginWithPassword(
+        { email: $('#login-input-email').val() },
+        $('#login-input-password').val(),
+        (error) => {
+          if (error) self.setState({ errorMessage: error.message });
+        });
     }
   }
 
@@ -147,6 +152,8 @@ class LoginPortal extends Component {
 }
 
 export default withTracker(() => {
+  Meteor.subscribe('allInvitations');
+
   return {
     invitees: SiteInvitations.find().fetch()
   };

@@ -2,11 +2,28 @@ import { Meteor } from 'meteor/meteor';
 import SiteInvitations from '../imports/api/site_invitations.js';
 import Notifications from '../imports/api/notifications.js';
 import Profiles from '../imports/api/profiles.js';
+import Groups from '../imports/api/groups.js';
 import Messages from '../imports/api/messages.js';
 import { check } from 'meteor/check';
 import { Accounts } from 'meteor/accounts-base';
 
 Meteor.methods({
+  addFriend: function(id1, id2) {
+    check(id1, String);
+    check(id2, String);
+    Profiles.update({ userId: id1 }, { $push: { friends: id2 } });
+    Profiles.update({ userId: id2 }, { $push: { friends: id1 } });
+  },
+  createGroup: function(name, id) {
+    check(name, String);
+    check(id, String);
+    Groups.insert({
+      name: name,
+      creatorUserId: id,
+      members: [],
+      createdAt: new Date()
+    });
+  },
   sendMessage: function(sender, thread, content) {
     check(sender, String);
     check(thread, String);

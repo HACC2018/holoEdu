@@ -23,4 +23,8 @@ if (Meteor.isServer) {
     check(userId, String);
     return SiteInvitations.find({ inviter: userId });
   });
+
+  Meteor.publish('allInvitations', function() {
+    return SiteInvitations.find();
+  });
 }
