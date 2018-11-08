@@ -74,6 +74,6 @@ export default withTracker(() => {
     newNotifications: Notifications.find({
       read: false,
       recipient: Meteor.userId()
-    }, { $sort: { createdAt: -1 } }).fetch()
+    }, { $sort: { createdAt: 1 } }).fetch()
   };
 })(NotificationSection);

@@ -21,8 +21,11 @@ class MessagesList extends Component {
             {(this.props.ready &&
               Object.keys(this.props.threads()).length > 0) ?
               Object.keys(this.props.threads()).map((key) =>
-                <div onClick={(e) => handleClick(e)(key)}>
-                  <h3>{Profiles.findOne({ userId: key }).name ||
+                <div style={{ border: 'thin black solid', borderRadius: '2px',
+                  padding: '10px', width: '100%' }}
+                onClick={(e) => handleClick(e)(key)}>
+                  <h3>{(Profiles.findOne({ userId: key }) &&
+                      Profiles.findOne({ userId: key }).name || null) ||
                     Groups.findOne({ _id: key }).name }</h3>
                   <p>{Messages.findOne({
                     _id: this.props.threads()[key] }).content}</p>
@@ -67,12 +70,15 @@ export default withTracker(({ callback }) => {
         }
         else retval[thread] = retval[thread].concat(sent[thread]);
       }
+      console.log(retval)
       for (var thread in groupReceived) {
+        console.log(retval[thread]);
         if (retval[thread] === undefined) {
           retval[thread] = groupReceived[thread];
         }
         else retval[thread] = retval[thread].concat(groupReceived[thread]);
       }
+      console.log(retval)
       for (var key in retval) {
         retval[key] = _.sortBy(retval[key], 'createdAt').reverse()[0]._id;
       }

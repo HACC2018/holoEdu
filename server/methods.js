@@ -3,11 +3,61 @@ import SiteInvitations from '../imports/api/site_invitations.js';
 import Notifications from '../imports/api/notifications.js';
 import Profiles from '../imports/api/profiles.js';
 import Groups from '../imports/api/groups.js';
+import Resources from '../imports/api/resources.js';
 import Messages from '../imports/api/messages.js';
 import { check } from 'meteor/check';
 import { Accounts } from 'meteor/accounts-base';
 
 Meteor.methods({
+  likeResource: function(resource, liker) {
+    check(resource, String);
+    check(liker, String);
+
+    Resources.update(
+      {
+        _id: resource
+      },
+      {
+        $push: { likers: liker }
+      }
+    );
+
+    Notifications.insert({
+      recipient: Resources.findOne({ _id: resource }).sharer,
+      content: '<p>' + Profiles.findOne({ userId: liker }).name +
+        ' liked your resource "' +
+        Resources.findOne({ _id: resource }).title + '".</p>',
+      notificationType: 'thumbs up',
+      read: false,
+      createdAt: new Date()
+    });
+  },
+  addResource: function(title, type, url, sharer, description) {
+    check(title, String);
+    check(type, String);
+    check(url, String);
+    check(sharer, String);
+    check(description, String);
+
+    Resources.insert({
+      title: title,
+      type: type,
+      url: url,
+      sharer: sharer,
+      createdAt: new Date(),
+      likers: []
+    });
+
+    Profiles.update({ userId: sharer }, { $inc: { points: 1 } });
+    Notifications.insert({
+      recipient: sharer,
+      content: '<p>You have received one point for sharing "' +
+        title + '".</p>',
+      notificationType: 'trophy',
+      read: false,
+      createdAt: new Date()
+    });
+  },
   addFriend: function(id1, id2) {
     check(id1, String);
     check(id2, String);

@@ -21,7 +21,8 @@ export default class ProfileCard extends Component {
   render() {
     var handleMessageClick = this.handleMessageClick.bind(this),
       handleNameClick = this.handleNameClick.bind(this),
-      handleGroupClick = this.handleGroupClick.bind(this);
+      handleGroupClick = this.handleGroupClick.bind(this),
+      handleConnectClick = this.handleConnectClick.bind(this);
 
     return (
       <div className="item" style={{ display: 'inline-block',
@@ -36,8 +37,6 @@ export default class ProfileCard extends Component {
             <span className="date">Joined {moment.duration(
               moment(this.props.profile.createdAt)
                 .diff(new Date())).humanize()} ago</span>
-          </div>
-          <div className="extra content">
             <a>
               <i className="user icon"></i>
               {this.props.profile.friends.length}

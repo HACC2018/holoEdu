@@ -156,6 +156,11 @@ class Header extends Component {
                       {this.props.profile.grade_level}
                     </a> : null)}
               </p>
+              {this.props.id === this.props.loggedInID ? <p>
+                <a href="#" className="ui circular icon label">
+                  <i className="trophy"></i>
+                  {this.props.profile.points}
+                </a></p> : null}
               {(this.props.id !== this.props.loggedInID &&
                 this.state.editMode) ? (
                   <textarea onChange={(e) => {

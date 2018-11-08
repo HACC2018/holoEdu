@@ -8,6 +8,7 @@ class GroupAddModal extends Component {
   handleClick(event) {
     return function(user, group) {
       Groups.update({ _id: group }, { $push: { members: user } });
+      $('#group-add-modal').modal('hide');
     }
   }
 

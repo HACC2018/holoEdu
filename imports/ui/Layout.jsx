@@ -10,6 +10,8 @@ import Groups from '../api/groups.js';
 import GroupsList from './GroupsList.jsx';
 import GroupAddModal from './GroupAddModal.jsx';
 import GroupCreateModal from './GroupCreateModal.jsx';
+import AddResourceModal from './AddResourceModal.jsx';
+import ResourceFeed from './ResourceFeed.jsx';
 import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
 import NotificationSection from './NotificationSection.jsx';
@@ -133,7 +135,10 @@ class Layout extends Component {
                 nameClickCallback={nameClickCallback} />,
               <InviteSection />] : null
           ] : null,
-          this.state.activeIconType === 'newspaper' ? null : null,
+          this.state.activeIconType === 'newspaper' ? [
+            <ResourceFeed />,
+            <AddResourceModal loggedInID={Meteor.userId()} />
+          ] : null,
           this.state.activeIconType === 'rocketchat' ? [
             <MessagesList callback={messageCallback} />,
             this.state.activeMessageThread !== '' ?

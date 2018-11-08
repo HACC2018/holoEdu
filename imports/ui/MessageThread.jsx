@@ -65,7 +65,7 @@ class MessageThread extends Component {
         <h2 className="ui header">Conversation with{' '}
           {(Profiles.findOne({ userId: this.props.threadId }) &&
             Profiles.findOne({ userId: this.props.threadId }).name || null) ||
-            (Groups.findOne({ _id: this.props.threadId }) && 
+            (Groups.findOne({ _id: this.props.threadId }) &&
             Groups.findOne({ _id: this.props.threadId }).name || null) }</h2>
         <div style={{ height: '225px', overflowY: 'scroll' }}>
           {this.props.getThread.map((message) =>
@@ -90,12 +90,15 @@ export default withTracker(({ threadId }) => {
   return {
     stop: function() { handle.stop(); },
     threadId: threadId,
-    getThread: Messages.find({ $or: [{
-      thread: Meteor.userId(),
-      sender: threadId
-    }, {
-      sender: Meteor.userId(),
-      thread: threadId
-    }] }, { $sort: { createdAt: -1 } }).fetch()
+    getThread:
+      Messages.find({ $or: !Groups.findOne({ _id: threadId }) ? [{
+        thread: Meteor.userId(),
+        sender: threadId
+      }, {
+        sender: Meteor.userId(),
+        thread: threadId
+      }] : [ { thread: threadId } ] }, {
+        $sort: { createdAt: -1 }
+      }).fetch()
   };
 })(MessageThread);
